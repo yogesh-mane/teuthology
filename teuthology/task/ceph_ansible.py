@@ -9,7 +9,7 @@ from cStringIO import StringIO
 from . import Task
 from tempfile import NamedTemporaryFile
 from ..config import config as teuth_config
-from ..misc import get_scratch_devices
+from ..misc import get_scratch_devices, register_daemons
 from teuthology import contextutil
 from teuthology.orchestra import run
 from teuthology import misc
@@ -133,6 +133,8 @@ class CephAnsible(Task):
             self.run_rh_playbook()
         else:
             self.run_playbook()
+        # setup deamongroup to use systemd
+        register_daemons(self.ctx)
 
     def generate_hosts_file(self):
         hosts_dict = dict()
@@ -304,7 +306,7 @@ class CephAnsible(Task):
                 out = StringIO()
                 remote.run(
                     args=['sudo', 'ceph', '--cluster', self.cluster_name,
-                          'health'], 
+                          'health'],
                     stdout=out,
                 )
                 out = out.getvalue().split(None, 1)[0]
@@ -510,5 +512,6 @@ class CephAnsible(Task):
 
 class CephAnsibleError(Exception):
     pass
+
 
 task = CephAnsible

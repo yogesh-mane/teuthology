@@ -28,6 +28,8 @@ from .orchestra import run
 from .config import config
 from .contextutil import safe_while
 from .orchestra.opsys import DEFAULT_OS_VERSION
+from teuthology.orchestra.daemon import DaemonGroup
+from ceph_manager import CephManager
 
 log = logging.getLogger(__name__)
 
@@ -353,6 +355,34 @@ def roles_of_type(roles_for_host, type_):
     for role in cluster_roles_of_type(roles_for_host, type_, None):
         _, _, id_ = split_role(role)
         yield id_
+
+
+def register_daemons(ctx):
+    """
+    Register daemons in ctx.deamons when cluster is
+    setup by ceph-ansible or ceph-deploy
+    """
+    # register context manager
+    log.info("Registering Manager")
+    cluster = 'ceph'
+    first_mon = get_first_mon(ctx, config)
+    (mon,) = ctx.cluster.only(first_mon).remotes.iterkeys()
+    ctx.managers = {}
+    ctx.managers[cluster] = CephManager(
+        mon,
+        ctx=ctx,
+        logger=log.getChild('ceph_manager.' + cluster),
+        cluster=cluster,
+    )
+    # register daemons
+    log.info("Registering Daemons")
+    ctx.daemons = DaemonGroup(use_systemd=True)
+    for remote, roles in ctx.cluster.remotes.iteritems():
+        for role in roles:
+            _, role, id = split_role(role)
+            log.info("Registering {rem}-{rol}-{id}".
+                     format(rem=remote, rol=role, id=id))
+            ctx.daemons.register_daemon(remote, role, id)
 
 
 def cluster_roles_of_type(roles_for_host, type_, cluster):
