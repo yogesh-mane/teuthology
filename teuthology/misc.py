@@ -32,11 +32,6 @@ from teuthology.orchestra.daemon import DaemonGroup
 
 log = logging.getLogger(__name__)
 
-try:
-  from tasks.ceph_manager import CephManager
-except ImportError:
-  log.info("QA suite path required for import")
-
 import datetime
 stamp = datetime.datetime.now().strftime("%y%m%d%H%M")
 
@@ -372,6 +367,7 @@ def register_daemons(ctx):
     first_mon = get_first_mon(ctx, config)
     (mon,) = ctx.cluster.only(first_mon).remotes.iterkeys()
     ctx.managers = {}
+    from tasks.ceph_manager import CephManager
     ctx.managers[cluster] = CephManager(
         mon,
         ctx=ctx,
