@@ -29,9 +29,13 @@ from .config import config
 from .contextutil import safe_while
 from .orchestra.opsys import DEFAULT_OS_VERSION
 from teuthology.orchestra.daemon import DaemonGroup
-from ceph_manager import CephManager
 
 log = logging.getLogger(__name__)
+
+try:
+  from ceph_manager import CephManager
+except ImportError:
+  log.info("QA suite path required for import")  
 
 import datetime
 stamp = datetime.datetime.now().strftime("%y%m%d%H%M")

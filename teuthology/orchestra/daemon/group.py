@@ -1,4 +1,3 @@
-from teuthology import misc
 from teuthology.orchestra.daemon.state import DaemonState
 from teuthology.orchestra.daemon.systemd import SystemDState
 
@@ -148,6 +147,7 @@ class DaemonGroup(object):
             # Handle explicit list of roles or wildcards
             for raw_role in roles:
                 try:
+                    import misc
                     cluster, role_type, role_id = misc.split_role(raw_role)
                 except ValueError:
                     msg = ("Invalid role '{0}', roles must be of format "
