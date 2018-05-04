@@ -33,9 +33,9 @@ from teuthology.orchestra.daemon import DaemonGroup
 log = logging.getLogger(__name__)
 
 try:
-  from ceph_manager import CephManager
+  from tasks.ceph_manager import CephManager
 except ImportError:
-  log.info("QA suite path required for import")  
+  log.info("QA suite path required for import")
 
 import datetime
 stamp = datetime.datetime.now().strftime("%y%m%d%H%M")
