@@ -4,6 +4,7 @@ import re
 import logging
 import yaml
 import time
+import errno
 
 from cStringIO import StringIO
 
@@ -305,7 +306,12 @@ class CephAnsible(Task):
                 not (ctx.config.get('archive-on-error') and ctx.summary['success']):
             log.info('Archiving logs...')
             path = os.path.join(ctx.archive, 'remote')
-            os.makedirs(path)
+            try:
+                os.makedirs(path)
+            except OSError as e:
+                if e.errno != errno.EISDIR or e.errno != errno.EEXIST:
+                    raise
+ #           os.makedirs(path)
 
             def wanted(role):
                 # Only attempt to collect logs from hosts which are part of the
