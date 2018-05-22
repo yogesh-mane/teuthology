@@ -448,6 +448,11 @@ class CephAnsible(Task):
             run.Raw('setuptools>=11.3'),
             run.Raw(ansible_ver),
             run.Raw(';'),
+            'pip',
+            'install',
+            '-r',
+            'requirements.txt',
+            run.Raw(';'),
             run.Raw(str_args)
         ])
         wait_for_health = self.config.get('wait-for-health', True)
