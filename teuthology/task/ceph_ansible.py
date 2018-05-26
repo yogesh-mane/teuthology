@@ -15,6 +15,7 @@ from ..misc import get_scratch_devices
 from teuthology import contextutil
 from teuthology.orchestra import run
 from teuthology.orchestra.daemon import DaemonGroup
+from teuthology.task.install import ship_utilities
 from teuthology import misc
 log = logging.getLogger(__name__)
 
@@ -569,18 +570,17 @@ class CephAnsible(Task):
 
     def _fix_roles_map(self):
         ctx = self.ctx
-        ctx.managers = {}
-        ctx.daemons = DaemonGroup(use_systemd=True)
+        if not hasattr(ctx, 'managers'):
+            ctx.managers = {}
+        if not hasattr(ctx, 'daemons'):
+            ctx.daemons = DaemonGroup(use_systemd=True)
         new_remote_role = dict()
-        clusters = set()
         for remote, roles in ctx.cluster.remotes.iteritems():
             new_remote_role[remote] = []
             generate_osd_list = True
             for role in roles:
                 cluster, rol, id = misc.split_role(role)
-                clusters.add(cluster)
-                if role.startswith('osd'):
-                    new_remote_role[remote].append(role)
+                if rol.startswith('osd'):
                     if generate_osd_list:
                         # gather osd ids as seen on host
                         out = StringIO()
@@ -602,8 +602,13 @@ class CephAnsible(Task):
                     id = osd_list.pop()
                     log.info("Registering Daemon {rol} {id}".format(rol=rol, id=id))
                     ctx.daemons.add_daemon(remote, rol, id)
-                elif role.startswith('mon') or role.startswith('mgr') or \
-                        role.startswith('mds') or role.startswith('rgw'):
+                    if len(role.split('.')) == 2:
+                        osd_role = "{rol}.{id}".format(rol=rol, id=id)
+                    else:
+                        osd_role = "{c}.{rol}.{id}".format(c=cluster, rol=rol, id=id)
+                    new_remote_role[remote].append(osd_role)
+                elif rol.startswith('mon') or rol.startswith('mgr') or \
+                        rol.startswith('mds') or rol.startswith('rgw'):
                     hostname = remote.shortname
                     target_role = role.split('.')[-2]
                     mapped_role = "{0}.{1}".format(target_role, hostname)
@@ -620,13 +625,12 @@ class CephAnsible(Task):
             misc.get_first_mon(self.ctx,
                                self.config, self.cluster_name)).remotes.iterkeys()
         from tasks.ceph_manager import CephManager
-        for cluster in clusters:
-            ctx.managers[cluster] = CephManager(
-                ceph_first_mon,
-                ctx=ctx,
-                logger=log.getChild('ceph_manager.' + cluster),
-                cluster=cluster,
-                )
+        ctx.managers[self.cluster_name] = CephManager(
+            ceph_first_mon,
+            ctx=ctx,
+            logger=log.getChild('ceph_manager.' + self.cluster_name),
+            cluster=self.cluster_name,
+            )
 
     def _generate_client_config(self):
         ceph_installer = self.ceph_installer
