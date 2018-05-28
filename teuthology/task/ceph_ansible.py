@@ -607,8 +607,7 @@ class CephAnsible(Task):
                     else:
                         osd_role = "{c}.{rol}.{id}".format(c=cluster, rol=rol, id=id)
                     new_remote_role[remote].append(osd_role)
-                elif rol.startswith('mon') or rol.startswith('mgr') or \
-                        rol.startswith('mds') or rol.startswith('rgw'):
+                elif rol.startswith('rgw'):
                     hostname = remote.shortname
                     target_role = role.split('.')[-2]
                     mapped_role = "{0}.{1}".format(target_role, hostname)
