@@ -65,6 +65,7 @@ class CephAnsible(Task):
         config = self.config or dict()
         self.playbook = None
         self.cluster_groups_to_roles = None
+        self.ready_cluster = None
         if 'playbook' in config:
             self.playbook = self.config['playbook']
         if 'repo' not in config:
@@ -581,13 +582,14 @@ class CephAnsible(Task):
         if not hasattr(ctx, 'daemons'):
             ctx.daemons = DaemonGroup(use_systemd=True)
         self.clusters_done = []
-        new_remote_role = dict()
+        self.new_remote_role = {}
+        cluster_name = None
         if self.ready_cluster not in self.clusters_done:
             for remote, roles in self.ready_cluster.remotes.iteritems():
-                new_remote_role[remote] = []
+                self.new_remote_role[remote] = []
                 generate_osd_list = True
                 for role in roles:
-                    cluster, rol, id = misc.split_role(role)
+                    cluster_name, rol, id = misc.split_role(role)
                     if rol.startswith('osd'):
                         if generate_osd_list:
                             # gather osd ids as seen on host
@@ -613,32 +615,35 @@ class CephAnsible(Task):
                         if len(role.split('.')) == 2:
                             osd_role = "{rol}.{id}".format(rol=rol, id=id)
                         else:
-                            osd_role = "{c}.{rol}.{id}".format(c=cluster, rol=rol, id=id)
-                        new_remote_role[remote].append(osd_role)
+                            osd_role = "{c}.{rol}.{id}".format(c=cluster_name, rol=rol, id=id)
+                        self.new_remote_role[remote].append(osd_role)
                     elif rol.startswith('rgw'):
                         hostname = remote.shortname
                         target_role = role.split('.')[-2]
                         mapped_role = "{0}.{1}".format(target_role, hostname)
                         log.info("New role : " + target_role + ":" + hostname)
-                        new_remote_role[remote].append(mapped_role)
+                        self.new_remote_role[remote].append(mapped_role)
                         # append old role for compatibility
-                        new_remote_role[remote].append(role)
                         log.info("Registering Daemon {rol} {id}".format(rol=rol, id=id))
                         ctx.daemons.add_daemon(remote, rol, hostname)
-                    else:
-                        new_remote_role[remote].append(role)
-                self.clusters_done.append(self.ready_cluster)
-        ctx.cluster.remotes = new_remote_role
-        (ceph_first_mon,) = self.ctx.cluster.only(
-            misc.get_first_mon(self.ctx,
-                               self.config, self.cluster_name)).remotes.iterkeys()
-        from tasks.ceph_manager import CephManager
-        ctx.managers[self.cluster_name] = CephManager(
-            ceph_first_mon,
-            ctx=ctx,
-            logger=log.getChild('ceph_manager.' + self.cluster_name),
-            cluster=self.cluster_name,
-            )
+                    elif rol.startswith('mon') or rol.startswith('mgr') or rol.startswith('mds'):
+                        hostname = remote.shortname
+                        self.new_remote_role[remote].append(role)
+                        log.info("Registering Daemon {rol} {id}".format(rol=rol, id=id))
+                        ctx.daemons.add_daemon(remote, rol, hostname)
+            self.clusters_done.append(self.ready_cluster)
+            ctx.cluster1 = Cluster()
+            ctx.cluster1.remotes = self.new_remote_role
+            (ceph_first_mon,) = ctx.cluster1.only(
+                misc.get_first_mon(self.ctx,
+                                   self.config, cluster_name)).remotes.iterkeys()
+            from tasks.ceph_manager import CephManager
+            ctx.managers[cluster_name] = CephManager(
+                ceph_first_mon,
+                ctx=ctx,
+                logger=log.getChild('ceph_manager.' + cluster_name),
+                cluster=cluster_name,
+                )
 
     def _generate_client_config(self):
         ceph_installer = self.ceph_installer
