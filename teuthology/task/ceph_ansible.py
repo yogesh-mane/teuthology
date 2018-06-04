@@ -404,7 +404,7 @@ class CephAnsible(Task):
             timeout=4200
         )
         self._create_rbd_pool()
-        self._fix_roles_map()
+        # self._fix_roles_map()
         # fix keyring permission for workunits
         self.fix_keyring_permission()
         self.wait_for_ceph_health()
