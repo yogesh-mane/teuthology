@@ -581,7 +581,11 @@ class CephAnsible(Task):
         if not hasattr(ctx, 'daemons'):
             ctx.daemons = DaemonGroup(use_systemd=True)
         self.clusters_done = []
-        new_remote_role = dict()
+        if not hasattr(ctx, 'new_remote_role'):
+            new_remote_role = dict()
+            ctx.new_remote_role = new_remote_role
+        else:
+            new_remote_role = ctx.new_remote_role
         if self.ready_cluster not in self.clusters_done:
             for remote, roles in self.ready_cluster.remotes.iteritems():
                 new_remote_role[remote] = []
