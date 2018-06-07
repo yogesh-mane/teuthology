@@ -613,7 +613,7 @@ class CephAnsible(Task):
                                 pass
                     id = osd_list.pop()
                     log.info("Registering Daemon {rol} {id}".format(rol=rol, id=id))
-                    ctx.daemons.add_daemon(remote, rol, id, cluster=self.cluster_name)
+                    ctx.daemons.add_daemon(remote, rol, id)
                     if len(role.split('.')) == 2:
                         osd_role = "{rol}.{id}".format(rol=rol, id=id)
                     else:
@@ -622,16 +622,14 @@ class CephAnsible(Task):
                 elif rol.startswith('mon') or rol.startswith('mgr') or rol.startswith('mds') \
                         or rol.startswith('rgw'):
                     hostname = remote.shortname
-                    target_role = role.split('.')[-2]
-#                        mapped_role = "{0}.{1}".format(target_role, hostname)
-#                        log.info("New role : " + target_role + ":" + hostname)
-#                        new_remote_role[remote].append(mapped_role)
-                    # append old role for compatibility
                     new_remote_role[remote].append(role)
                     log.info("Registering Daemon {rol} {id}".format(rol=rol, id=id))
-                    ctx.daemons.add_daemon(remote, rol, hostname, cluster=self.cluster_name)
-                else:
+                    ctx.daemons.add_daemon(remote, rol, hostname)
+                elif rol.startswith('rgw'):
+                    hostname = remote.shortname
                     new_remote_role[remote].append(role)
+                    log.info("Registering Daemon {rol} {id}".format(rol=rol, id=id))
+                    ctx.daemons.add_daemon(remote, rol, ('rgw.'+hostname))
         ctx.cluster.remotes.update(new_remote_role)
         (ceph_first_mon,) = self.ctx.cluster.only(
             misc.get_first_mon(self.ctx,
