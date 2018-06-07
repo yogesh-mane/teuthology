@@ -580,8 +580,7 @@ class CephAnsible(Task):
         ctx = self.ctx
         if not hasattr(ctx, 'managers'):
             ctx.managers = {}
-        if not hasattr(ctx, 'daemons'):
-            ctx.daemons = DaemonGroup(use_systemd=True)
+        ctx.daemons = DaemonGroup(use_systemd=True)
         if not hasattr(ctx, 'new_remote_role'):
             new_remote_role = dict()
             ctx.new_remote_role = new_remote_role
@@ -592,45 +591,44 @@ class CephAnsible(Task):
             generate_osd_list = True
             for role in roles:
                 cluster, rol, id = misc.split_role(role)
-                log.info('print cluster name {cluster} and remote {remote}'.format(cluster=cluster, remote=remote))
-                if cluster == self.cluster_name:
-                    if rol.startswith('osd'):
-                        if generate_osd_list:
-                            # gather osd ids as seen on host
-                            out = StringIO()
-                            remote.run(args=[
-                                            'ps', '-eaf', run.Raw('|'), 'grep',
-                                            'ceph-osd', run.Raw('|'),
-                                            run.Raw('awk {\'print $13\'}')],
-                                       stdout=out)
-                            osd_list_all = out.getvalue().split('\n')
-                            generate_osd_list = False
-                            osd_list = []
-                            for osd_id in osd_list_all:
-                                try:
-                                    osd_num = int(osd_id)
-                                    osd_list.append(osd_id)
-                                except ValueError:
-                                    # ignore any empty lines as part of output
-                                    pass
-                        id = osd_list.pop()
-                        log.info("Registering Daemon {rol} {id}".format(rol=rol, id=id))
-                        ctx.daemons.add_daemon(remote, rol, id)
-                        if len(role.split('.')) == 2:
-                            osd_role = "{rol}.{id}".format(rol=rol, id=id)
-                        else:
-                            osd_role = "{c}.{rol}.{id}".format(c=cluster, rol=rol, id=id)
-                        new_remote_role[remote].append(osd_role)
-                    elif rol.startswith('mon') or rol.startswith('mgr') or rol.startswith('mds'):
-                        hostname = remote.shortname
-                        new_remote_role[remote].append(role)
-                        log.info("Registering Daemon {rol} {id}".format(rol=rol, id=id))
-                        ctx.daemons.add_daemon(remote, rol, hostname)
-                    elif rol.startswith('rgw'):
-                        hostname = remote.shortname
-                        new_remote_role[remote].append(role)
-                        log.info("Registering Daemon {rol} {id}".format(rol=rol, id=id))
-                        ctx.daemons.add_daemon(remote, rol, ('rgw.'+hostname))
+                if rol.startswith('osd'):
+                    if generate_osd_list:
+                        # gather osd ids as seen on host
+                        out = StringIO()
+                        remote.run(args=[
+                                        'ps', '-eaf', run.Raw('|'), 'grep',
+                                        'ceph-osd', run.Raw('|'),
+                                        run.Raw('awk {\'print $13\'}')],
+                                   stdout=out)
+                        osd_list_all = out.getvalue().split('\n')
+                        generate_osd_list = False
+                        osd_list = []
+                        for osd_id in osd_list_all:
+                            try:
+                                osd_num = int(osd_id)
+                                osd_list.append(osd_id)
+                            except ValueError:
+                                # ignore any empty lines as part of output
+                                pass
+                    id = osd_list.pop()
+                    log.info("Registering Daemon {rol} {id}".format(rol=rol, id=id))
+                    ctx.daemons.add_daemon(remote, rol, id)
+                    if len(role.split('.')) == 2:
+                        osd_role = "{rol}.{id}".format(rol=rol, id=id)
+                    else:
+                        osd_role = "{c}.{rol}.{id}".format(c=cluster, rol=rol, id=id)
+                    new_remote_role[remote].append(osd_role)
+                elif rol.startswith('mon') or rol.startswith('mgr') or rol.startswith('mds') \
+                        or rol.startswith('rgw'):
+                    hostname = remote.shortname
+                    new_remote_role[remote].append(role)
+                    log.info("Registering Daemon {rol} {id}".format(rol=rol, id=id))
+                    ctx.daemons.add_daemon(remote, rol, hostname)
+                elif rol.startswith('rgw'):
+                    hostname = remote.shortname
+                    new_remote_role[remote].append(role)
+                    log.info("Registering Daemon {rol} {id}".format(rol=rol, id=id))
+                    ctx.daemons.add_daemon(remote, rol, id_='rgw.' + hostname)
         ctx.cluster.remotes.update(new_remote_role)
         (ceph_first_mon,) = self.ctx.cluster.only(
             misc.get_first_mon(self.ctx,
