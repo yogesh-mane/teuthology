@@ -28,7 +28,7 @@ class SystemDState(DaemonState):
     def _get_systemd_cmd(self, action):
         cmd = systemd_cmd_templ.format(
             action=action,
-            daemon='%s-%s' % (self.cluster, self.daemon_type),
+            daemon='ceph-%s' % (self.daemon_type),
             id_=self.id_.replace('client.', ''),
         )
         return cmd
@@ -39,7 +39,7 @@ class SystemDState(DaemonState):
         self.restart_cmd = self._get_systemd_cmd('restart')
         self.show_cmd = self._get_systemd_cmd('show')
         self.status_cmd = self._get_systemd_cmd('status')
-        cluster_and_type = '%s-%s' % (self.cluster, self.daemon_type)
+        cluster_and_type = 'ceph-%s' % (self.daemon_type)
         if self.type_ == self.daemon_type:
             syslog_id = cluster_and_type
         else:
