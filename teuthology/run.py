@@ -233,6 +233,16 @@ def get_initial_tasks(lock, config, machine_type):
 
     if 'redhat' in config:
         init_tasks.extend([
+            {'internal.setup_stage_cdn': None}
+        ])
+    # dont run cm-ansible by default unless requested in config
+    # nodes are reimaged by FOG and the images provided
+    # by FOG have already gone through cm-ansible run
+    if config.get('run-cm-ansible', False):
+        init_tasks.extend([{'ansible.cephlab': None}])
+
+    if 'redhat' in config:
+        init_tasks.extend([
             {'internal.git_ignore_ssl': None},
             {'internal.setup_cdn_repo': None},
             {'internal.setup_base_repo': None},

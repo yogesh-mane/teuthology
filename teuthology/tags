@@ -1,0 +1,127 @@
+!_TAG_FILE_SORTED	2	/0=unsorted, 1=sorted, 2=foldcase/
+all_roles	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def all_roles(cluster):$/;"	f	language:Python
+all_roles_of_type	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def all_roles_of_type(cluster, type_):$/;"	f	language:Python
+append_lines_to_file	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def append_lines_to_file(remote, path, lines, sudo=False):$/;"	f	language:Python
+argparse	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^import argparse$/;"	i	language:Python
+canonicalize_hostname	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def canonicalize_hostname(hostname, user='ubuntu'):$/;"	f	language:Python
+ceph_role	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def ceph_role(role):$/;"	f	language:Python
+cleanup	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def cleanup(ctx):$/;"	f	language:Python
+cluster_roles_of_type	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def cluster_roles_of_type(roles_for_host, type_, cluster):$/;"	f	language:Python
+CommandCrashedError	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^from teuthology.exceptions import (CommandCrashedError, CommandFailedError,$/;"	i	language:Python
+CommandFailedError	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^from teuthology.exceptions import (CommandCrashedError, CommandFailedError,$/;"	i	language:Python
+config	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^from .config import config$/;"	i	language:Python
+configobj	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^import configobj$/;"	i	language:Python
+config_file	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def config_file(string):$/;"	f	language:Python
+contextlib	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/run.py	/^import contextlib$/;"	i	language:Python
+copy_file	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def copy_file(from_remote, from_path, to_remote, to_path=None):$/;"	f	language:Python
+create_file	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def create_file(remote, path, data="", permissions=str(644), sudo=False):$/;"	f	language:Python
+create_simple_monmap	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def create_simple_monmap(ctx, remote, conf, path=None):$/;"	f	language:Python
+datetime	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^import datetime$/;"	i	language:Python
+decanonicalize_hostname	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def decanonicalize_hostname(hostname):$/;"	f	language:Python
+deep_merge	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def deep_merge(a, b):$/;"	f	language:Python
+DEFAULT_OS_VERSION	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^from .orchestra.opsys import DEFAULT_OS_VERSION$/;"	i	language:Python
+delete_file	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def delete_file(remote, path, sudo=False, force=False):$/;"	f	language:Python
+email_results	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/run.py	/^from .results import email_results$/;"	i	language:Python
+FakeNamespace	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/run.py	/^from .config import FakeNamespace$/;"	i	language:Python
+feed_many_stdins	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def feed_many_stdins(fp, processes):$/;"	f	language:Python
+feed_many_stdins_and_close	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def feed_many_stdins_and_close(fp, processes):$/;"	f	language:Python
+fetch_qa_suite	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/run.py	/^from .repo_utils import fetch_qa_suite$/;"	i	language:Python
+fetch_tasks_if_needed	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/run.py	/^def fetch_tasks_if_needed(job_config):$/;"	f	language:Python
+gen_addresses	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^    def gen_addresses():$/;"	f	language:Python	function:create_simple_monmap
+getpass	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^import getpass$/;"	i	language:Python
+get_archive_dir	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def get_archive_dir(ctx):$/;"	f	language:Python
+get_ceph_binary_url	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def get_ceph_binary_url(package=None,$/;"	f	language:Python
+get_clients	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def get_clients(ctx, roles):$/;"	f	language:Python
+get_distro	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def get_distro(ctx):$/;"	f	language:Python
+get_distro_version	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def get_distro_version(ctx):$/;"	f	language:Python
+get_file	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def get_file(remote, path, sudo=False, dest_dir='\/tmp'):$/;"	f	language:Python
+get_first_mon	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def get_first_mon(ctx, config, cluster='ceph'):$/;"	f	language:Python
+get_http_log_path	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def get_http_log_path(archive_dir, job_id=None):$/;"	f	language:Python
+get_initial_tasks	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/run.py	/^def get_initial_tasks(lock, config, machine_type):$/;"	f	language:Python
+get_machine_type	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/run.py	/^def get_machine_type(machine_type, config):$/;"	f	language:Python
+get_mons	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def get_mons(roles, ips):$/;"	f	language:Python
+get_mon_names	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def get_mon_names(ctx, cluster='ceph'):$/;"	f	language:Python
+get_multi_machine_types	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def get_multi_machine_types(machinetype):$/;"	f	language:Python
+get_pkg_type	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def get_pkg_type(os_type):$/;"	f	language:Python
+get_results_url	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def get_results_url(run_name, job_id=None):$/;"	f	language:Python
+get_scratch_devices	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def get_scratch_devices(remote):$/;"	f	language:Python
+get_status	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/run.py	/^from .job_status import get_status$/;"	i	language:Python
+get_summary	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/run.py	/^def get_summary(owner, description):$/;"	f	language:Python
+get_system_type	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def get_system_type(remote, distro=False, version=False):$/;"	f	language:Python
+get_testdir	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def get_testdir(ctx=None):$/;"	f	language:Python
+get_test_user	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def get_test_user(ctx=None):$/;"	f	language:Python
+get_teuthology_command	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/run.py	/^def get_teuthology_command(args):$/;"	f	language:Python
+get_user	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def get_user():$/;"	f	language:Python
+get_user	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/run.py	/^from .misc import get_user, merge_configs$/;"	i	language:Python
+get_valgrind_args	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def get_valgrind_args(testdir, name, preamble, v):$/;"	f	language:Python
+get_wwn_id_map	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def get_wwn_id_map(remote, devs):$/;"	f	language:Python
+hostname_expr_templ	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^hostname_expr_templ = '(?P<user>.*@)?(?P<shortname>.*)\\.{lab_domain}'$/;"	v	language:Python
+install_except_hook	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/run.py	/^from teuthology import install_except_hook$/;"	i	language:Python
+is_arm	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^is_arm = lambda x: x.startswith('tala') or x.startswith($/;"	v	language:Python
+is_in_dict	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def is_in_dict(searchkey, searchval, d):$/;"	f	language:Python
+is_type	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def is_type(type_, cluster=None):$/;"	f	language:Python
+json	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^import json$/;"	i	language:Python
+log	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^log = logging.getLogger(__name__)$/;"	v	language:Python
+log	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/run.py	/^log = logging.getLogger(__name__)$/;"	v	language:Python
+logging	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^import logging$/;"	i	language:Python
+logging	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/run.py	/^import logging$/;"	i	language:Python
+main	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/run.py	/^def main(args):$/;"	f	language:Python
+MergeConfig	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^class MergeConfig(argparse.Action):$/;"	c	language:Python
+merge_configs	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def merge_configs(config_paths):$/;"	f	language:Python
+merge_configs	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/run.py	/^from .misc import get_user, merge_configs$/;"	i	language:Python
+move_file	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def move_file(remote, from_path, to_path, sudo=False, preserve_perms=True):$/;"	f	language:Python
+nuke	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/run.py	/^from .nuke import nuke$/;"	i	language:Python
+num_instances_of_type	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def num_instances_of_type(cluster, type_, ceph_cluster='ceph'):$/;"	f	language:Python
+os	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^import os$/;"	i	language:Python
+os	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/run.py	/^import os$/;"	i	language:Python
+parallel	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^from teuthology.parallel import parallel$/;"	i	language:Python
+pprint	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^import pprint$/;"	i	language:Python
+prepend_lines_to_file	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def prepend_lines_to_file(remote, path, lines, sudo=False):$/;"	f	language:Python
+pull_directory	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def pull_directory(remote, remotedir, localdir):$/;"	f	language:Python
+pull_directory_tarball	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def pull_directory_tarball(remote, remotedir, localfile):$/;"	f	language:Python
+re	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^import re$/;"	i	language:Python
+reboot	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def reboot(node, timeout=300, interval=30):$/;"	f	language:Python
+reconnect	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def reconnect(ctx, timeout, remotes=None):$/;"	f	language:Python
+remove_lines_from_file	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def remove_lines_from_file(remote, path, line_is_valid_test,$/;"	f	language:Python
+replace_all_with_clients	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def replace_all_with_clients(cluster, config):$/;"	f	language:Python
+report	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/run.py	/^from . import report$/;"	i	language:Python
+report_outcome	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/run.py	/^def report_outcome(config, archive, summary, fake_ctx):$/;"	f	language:Python
+roles_of_type	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def roles_of_type(roles_for_host, type_):$/;"	f	language:Python
+run	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^from .orchestra import run$/;"	i	language:Python
+run_tasks	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/run.py	/^from .run_tasks import run_tasks$/;"	i	language:Python
+safepath	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^from teuthology import safepath$/;"	i	language:Python
+safe_while	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^from .contextutil import safe_while$/;"	i	language:Python
+setup_config	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/run.py	/^def setup_config(config_paths):$/;"	f	language:Python
+set_up_logging	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/run.py	/^def set_up_logging(verbose, archive):$/;"	f	language:Python
+sh	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def sh(command, log_limit=1024):$/;"	f	language:Python
+skeleton_config	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def skeleton_config(ctx, roles, ips, cluster='ceph'):$/;"	f	language:Python
+socket	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^import socket$/;"	i	language:Python
+split_role	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def split_role(role):$/;"	f	language:Python
+ssh_keyscan	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def ssh_keyscan(hostnames, _raise=True):$/;"	f	language:Python
+ssh_keyscan_wait	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def ssh_keyscan_wait(hostname):$/;"	f	language:Python
+stamp	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^stamp = datetime.datetime.now().strftime("%y%m%d%H%M")$/;"	v	language:Python
+stop_daemons_of_type	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def stop_daemons_of_type(ctx, type_, cluster='ceph'):$/;"	f	language:Python
+StringIO	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^from cStringIO import StringIO$/;"	i	language:Python
+StringIO	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/run.py	/^import StringIO$/;"	i	language:Python
+subprocess	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^import subprocess$/;"	i	language:Python
+sudo_write_file	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def sudo_write_file(remote, path, data, perms=None, owner=None):$/;"	f	language:Python
+sys	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^import sys$/;"	i	language:Python
+sys	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/run.py	/^import sys$/;"	i	language:Python
+tarfile	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^import tarfile$/;"	i	language:Python
+tasks	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/run.py	/^        import tasks$/;"	i	language:Python
+teuthology	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/run.py	/^import teuthology$/;"	i	language:Python
+teuth_config	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/run.py	/^from .config import config as teuth_config$/;"	i	language:Python
+time	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^import time$/;"	i	language:Python
+unregister_rhel_systems	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def unregister_rhel_systems(ctx):$/;"	f	language:Python
+urllib2	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^import urllib2$/;"	i	language:Python
+urlparse	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^import urlparse$/;"	i	language:Python
+validate_tasks	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/run.py	/^def validate_tasks(config):$/;"	f	language:Python
+wait_until_healthy	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def wait_until_healthy(ctx, remote, ceph_cluster='ceph', use_sudo=False):$/;"	f	language:Python
+wait_until_osds_up	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def wait_until_osds_up(ctx, cluster, remote, ceph_cluster='ceph'):$/;"	f	language:Python
+write_file	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def write_file(remote, path, data):$/;"	f	language:Python
+write_initial_metadata	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/run.py	/^def write_initial_metadata(archive, config, name, description, owner):$/;"	f	language:Python
+yaml	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^import yaml$/;"	i	language:Python
+yaml	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/run.py	/^import yaml$/;"	i	language:Python
+_is_type	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^    def _is_type(role):$/;"	f	language:Python	function:is_type
+_ssh_keyscan	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^def _ssh_keyscan(hostname):$/;"	f	language:Python
+__call__	/home/wbhack3r/Downloads/git/upstream/teuthology/teuthology/misc.py	/^    def __call__(self, parser, namespace, values, option_string=None):$/;"	m	language:Python	class:MergeConfig	file:

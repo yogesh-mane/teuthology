@@ -5,11 +5,61 @@ import contextlib
 import logging
 import requests
 from tempfile import NamedTemporaryFile
+from teuthology.config import config as teuthconfig
 from teuthology.parallel import parallel
 from teuthology.orchestra import run
 from teuthology.task.install.redhat import set_deb_repo
+from teuthology.exceptions import CommandFailedError
 
 log = logging.getLogger(__name__)
+
+
+@contextlib.contextmanager
+def setup_stage_cdn(ctx, config):
+    """
+    Configure internal stage cdn
+    """
+    with parallel() as p:
+        for remote in ctx.cluster.remotes.iterkeys():
+            if remote.os.name == 'rhel':
+                log.info("subscribing stage cdn on : %s", remote.shortname)
+                p.spawn(_subscribe_stage_cdn, remote, teuthconfig)
+
+    try:
+        yield
+    finally:
+        with parallel() as p:
+            for remote in ctx.cluster.remotes.iterkeys():
+                p.spawn(_unsubscribe_stage_cdn, remote)
+
+
+def _subscribe_stage_cdn(remote, teuthconfig):
+    _unsubscribe_stage_cdn(remote)
+    cdn_config = teuthconfig.get('cdn-config', dict())
+    server_url = cdn_config.get('server-url', 'subscription.rhsm.stage.redhat.com:443/subscription')
+    base_url = cdn_config.get('base-url', 'https://cdn.stage.redhat.com')
+    username = cdn_config.get('username', 'qa@redhat.com')
+    password = cdn_config.get('password')
+    remote.run(
+        args=[
+            'sudo', 'subscription-manager', '--force', 'register',
+            run.Raw('--serverurl=' + server_url),
+            run.Raw('--baseurl=' + base_url),
+            run.Raw('--username=' + username),
+            run.Raw('--password=' + password),
+            '--auto-attach'
+            ],
+        timeout=720)
+    _enable_rhel_repos(remote)
+
+
+def _unsubscribe_stage_cdn(remote):
+    try:
+        remote.run(args=['sudo', 'subscription-manager', 'unregister'],
+                   check_status=False)
+    except CommandFailedError:
+        # FIX ME
+        log.info("unregistring subscription-manager failed, ignoring")
 
 
 @contextlib.contextmanager
@@ -45,6 +95,14 @@ def setup_additional_repo(ctx, config):
 
     yield
 
+
+def _enable_rhel_repos(remote):
+    rhel_7_rpms = ['rhel-7-server-rpms',
+                   'rhel-7-server-optional-rpms',
+                   'rhel-7-server-extras-rpms']
+    for repo in rhel_7_rpms:
+        remote.run(args=['sudo', 'subscription-manager',
+                         'repos', '--enable={r}'.format(r=repo)])
 
 @contextlib.contextmanager
 def setup_base_repo(ctx, config):
