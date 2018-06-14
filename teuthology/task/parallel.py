@@ -48,9 +48,15 @@ def task(ctx, config):
         for entry in config:
             if not isinstance(entry, dict):
                 entry = ctx.config.get(entry, {})
+                log.info("entry: type is ")
+                log.info(entry)
                 # support the usual list syntax for tasks
                 if isinstance(entry, list):
                     entry = dict(sequential=entry)
+                    log.info("entry inside list: type is")
+                    log.info(entry)
+            log.info("final entry is")
+            log.info(entry)
             ((taskname, confg),) = entry.iteritems()
             p.spawn(_run_spawned, ctx, confg, taskname)
 
