@@ -470,7 +470,10 @@ class Run(object):
         log.debug('Suite %s in %s' % (suite_name, suite_path))
         configs = [
             (combine_path(suite_name, item[0]), item[1]) for item in
-            build_matrix(suite_path, subset=self.args.subset, seed=self.args.seed)
+            build_matrix(
+                suite_path, subset=self.args.subset, seed=self.args.seed,
+                is_rerun=(self.args.rerun is not None),
+            )
         ]
         log.info('Suite %s in %s generated %d jobs (not yet filtered)' % (
             suite_name, suite_path, len(configs)))

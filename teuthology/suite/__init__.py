@@ -73,6 +73,7 @@ def main(args):
         config.archive_upload = conf.archive_upload
         log.info('Will upload archives to ' + conf.archive_upload)
 
+    log.debug('rerun %s', conf.rerun)
     if conf.rerun:
         rerun_filters = get_rerun_filters(conf.rerun, conf.rerun_statuses)
         if len(rerun_filters['descriptions']) == 0:
@@ -104,7 +105,9 @@ def get_rerun_filters(name, statuses):
     for job in run['jobs']:
         if job['status'] in statuses:
             jobs.append(job)
+    log.debug("%s jobs", len(jobs))
     filters['descriptions'] = [job['description'] for job in jobs if job['description']]
+    log.debug("filters %s", filters)
     return filters
 
 
