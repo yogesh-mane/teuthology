@@ -58,7 +58,10 @@ def build_matrix(path, subset=None, seed=None, is_rerun=False):
         )
     random.seed(seed)
     mat, first, matlimit = _get_matrix(path, subset, is_rerun)
-    return generate_combinations(path, mat, first, matlimit)
+    combs = generate_combinations(path, mat, first, matlimit)
+    with open('/tmp/combs.txt', 'w') as f:
+        f.write(str(combs))
+    return combs
 
 
 def _get_matrix(path, subset=None, is_rerun=False):
