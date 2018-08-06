@@ -447,6 +447,7 @@ class CephAnsible(Task):
         # fix keyring permission for workunits
         self.fix_keyring_permission()
         self.wait_for_ceph_health()
+        self._fix_roles_map()
 
     def run_playbook(self):
         # setup ansible on first mon node
