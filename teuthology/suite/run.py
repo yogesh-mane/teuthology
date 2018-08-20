@@ -303,7 +303,8 @@ class Run(object):
 
         # Make sure the yaml paths are actually valid
         for yaml_path in self.base_yaml_paths:
-            full_yaml_path = os.path.join(self.suite_repo_path, yaml_path)
+            full_yaml_path = os.path.join(self.suite_repo_path, yaml_path) or os.path.join(self.suite_repo_path,
+                                                                                           ' ' + yaml_path)
             if not os.path.exists(full_yaml_path):
                 raise IOError("File not found: " + full_yaml_path)
 
