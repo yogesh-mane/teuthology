@@ -577,7 +577,7 @@ class CephAnsible(Task):
             ceph_installer.run(args=('cat', 'ceph-ansible/group_vars/all'))
 
     def _ship_utilities(self):
-        with ship_utilities(self.ctx, {'skipcleanup': True}) as ship_utils:
+        with ship_utilities(self.ctx, {'skipcleanup': False}) as ship_utils:
             ship_utils
 
     def _fix_roles_map(self):
