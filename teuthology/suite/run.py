@@ -329,6 +329,12 @@ class Run(object):
             if results_url:
                 log.info("Test results viewable at %s", results_url)
 
+    def _fix_dollar_mod(self, filter_inorout):
+        filter_new = []
+        for part in filter_inorout:
+            filter_new.append(re.sub('\$/', '/', part))
+        return filter_new
+
     def collect_jobs(self, arch, configs, newest=False):
         jobs_to_schedule = []
         jobs_missing_packages = []
@@ -346,6 +352,7 @@ class Run(object):
             # separated components to be used in searches.
             filter_in = self.args.filter_in
             if filter_in:
+                filter_in = self._fix_dollar_mod(filter_in)
                 if not any([x in description for x in filter_in]):
                     for filt_samp in filter_in:
                         if any(x.find(filt_samp) >= 0 for x in base_frag_paths):
@@ -354,6 +361,7 @@ class Run(object):
                         continue
             filter_out = self.args.filter_out
             if filter_out:
+                filter_out = self._fix_dollar_mod(filter_out)
                 if any([x in description for x in filter_out]):
                     continue
                 is_collected = True
