@@ -471,13 +471,10 @@ class CephAnsible(Task):
         for i in range(len(ips)):
             ip_vars['ip_var' + str(i)] = ips.pop()
 
-        with open('ip_vars.json', 'w') as fp:
-            json.dump(ip_vars, fp)
-
         args = [
             'ANSIBLE_STDOUT_CALLBACK=debug',
             'ansible-playbook', '-vv', 'haproxy.yaml',
-            '-e', "@ip_vars.json",
+            '-e', "'%s'" % json.dumps(ip_vars),
             '-i', 'inven.yml'
         ]
         log.debug("Running %s", args)
