@@ -147,8 +147,7 @@ class CephAnsible(Task):
         self._ship_utilities()
         if self.config.get('rhbuild'):
             self.run_rh_playbook()
-            if self.config.get('haproxy', False):
-                self.run_haproxy()
+            self.run_haproxy()
         else:
             self.run_playbook()
 
