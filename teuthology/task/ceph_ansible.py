@@ -489,7 +489,9 @@ class CephAnsible(Task):
             installer_node.run(
                 args=[
                     'cp',
+                    '-r',
                     run.Raw('~/ceph-ansible/infrastructure-playbooks/haproxy.yml'),
+                    run.Raw('~/ceph-ansible/infrastructure-playbooks/haproxy-templates/'),
                     run.Raw('~/ceph-ansible/'),
                 ]
             )
