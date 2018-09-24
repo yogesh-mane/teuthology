@@ -456,8 +456,8 @@ class CephAnsible(Task):
         """
         task:
             ceph-ansible:
-                haproxy: null
-                haproxy_repo: https://github.com/smanjara/ansible-haproxy/
+                haproxy: true
+                haproxy_repo: https://github.com/smanjara/ansible-haproxy.git
                 haproxy_branch: master
         """
         # Clone haproxy from https://github.com/smanjara/ansible-haproxy/,
@@ -477,7 +477,10 @@ class CephAnsible(Task):
             'clone',
             run.Raw('-b %s' % branch),
             run.Raw(haproxy_ansible_repo),
-        ])
+        ],
+            timeout=4200,
+            stdout=StringIO()
+        )
 
         remote = self.ctx.cluster.only(misc.is_type('haproxy', self.cluster_name)).remotes.iterkeys()
         allhosts = self.ctx.cluster.only(misc.is_type('rgw', self.cluster_name)).remotes.keys()
