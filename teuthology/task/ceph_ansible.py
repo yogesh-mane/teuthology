@@ -495,7 +495,7 @@ class CephAnsible(Task):
 
         args = [
             'ANSIBLE_STDOUT_CALLBACK=debug',
-            'ansible-playbook', '-vv', 'haproxy.yaml',
+            'ansible-playbook', '-vv', 'haproxy.yml',
             '-e', "'%s'" % json.dumps(ip_vars),
             '-i', '~/ceph-ansible/inven.yml'
         ]
