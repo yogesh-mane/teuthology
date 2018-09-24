@@ -458,7 +458,7 @@ class CephAnsible(Task):
             ceph-ansible:
                 haproxy: null
                 haproxy_repo: https://github.com/smanjara/ansible-haproxy/
-                branch: master
+                haproxy_branch: master
         """
         # Clone haproxy from https://github.com/smanjara/ansible-haproxy/,
         # use inven.yml from ceph-ansible dir to read haproxy node from
@@ -466,8 +466,8 @@ class CephAnsible(Task):
         installer_node = self.ceph_installer
         haproxy_ansible_repo = self.config['haproxy_repo']
         branch = 'master'
-        if self.config.get('branch'):
-            branch = self.config.get('branch')
+        if self.config.get('haproxy_branch'):
+            branch = self.config.get('haproxy_branch')
 
         installer_node.run(args=[
             'cd',
