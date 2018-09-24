@@ -147,7 +147,8 @@ class CephAnsible(Task):
         self._ship_utilities()
         if self.config.get('rhbuild'):
             self.run_rh_playbook()
-            self.run_haproxy()
+            if self.config.get('haproxy', False):
+                self.run_haproxy()
         else:
             self.run_playbook()
 
@@ -456,8 +457,27 @@ class CephAnsible(Task):
         task:
             ceph-ansible:
                 haproxy: null
-
+                haproxy_repo: https://github.com/smanjara/ansible-haproxy/
+                branch: master
         """
+        # Clone haproxy from https://github.com/smanjara/ansible-haproxy/,
+        # use inven.yml from ceph-ansible dir to read haproxy node from
+
+        installer_node = self.ceph_installer
+        haproxy_ansible_repo = self.config['haproxy_repo']
+        branch = 'master'
+        if self.config.get('branch'):
+            branch = self.config.get('branch')
+
+        installer_node.run(args=[
+            'cd',
+            run.Raw('~/'),
+            run.Raw(';'),
+            'git',
+            'clone',
+            run.Raw('-b %s' % branch),
+            run.Raw(haproxy_ansible_repo),
+        ])
 
         remote = self.ctx.cluster.only(misc.is_type('haproxy', self.cluster_name)).remotes.iterkeys()
         allhosts = self.ctx.cluster.only(misc.is_type('rgw', self.cluster_name)).remotes.keys()
@@ -466,6 +486,7 @@ class CephAnsible(Task):
         for each_client in clients:
             ips.append(socket.gethostbyname(each_client.hostname))
 
+        # substitute {{ ip_var' }} in haproxy.yml file with rgw node ips
         ip_vars = {}
         for i in range(len(ips)):
             ip_vars['ip_var' + str(i)] = ips.pop()
@@ -474,30 +495,17 @@ class CephAnsible(Task):
             'ANSIBLE_STDOUT_CALLBACK=debug',
             'ansible-playbook', '-vv', 'haproxy.yaml',
             '-e', "'%s'" % json.dumps(ip_vars),
-            '-i', 'inven.yml'
+            '-i', '~/ceph-ansible/inven.yml'
         ]
         log.debug("Running %s", args)
         str_args = ' '.join(args)
-        installer_node = self.ceph_installer
-        # copy haproxy playbook from infra dir to top level dir
-        # as required by ceph-ansible
         installer_node.run(
             args=[
-                'cp',
-                '-r',
-                run.Raw('~/ceph-ansible/infrastructure-playbooks/haproxy.yml'),
-                run.Raw('~/ceph-ansible/infrastructure-playbooks/haproxy-templates/'),
-                run.Raw('~/ceph-ansible/'),
-            ]
-        )
-        installer_node.run(
-            args=[
-                run.Raw('cd ~/ceph-ansible'),
+                run.Raw('cd ~/ansible-haproxy'),
                 run.Raw(';'),
                 run.Raw(str_args)
             ]
         )
-
 
     def run_playbook(self):
         # setup ansible on first mon node
