@@ -26,7 +26,7 @@ class RemoteProcess(object):
         'client', 'args', 'check_status', 'command', 'hostname',
         'stdin', 'stdout', 'stderr',
         '_stdin_buf', '_stdout_buf', '_stderr_buf',
-        'returncode', 'exitstatus', 'timeout',
+        'returncode', 'exitstatus', 'timeout', 'deadline', 'cwd',
         'greenlets',
         '_wait', 'logger',
         # for orchestra.remote.Remote to place a backreference
@@ -37,7 +37,7 @@ class RemoteProcess(object):
     deadlock_warning = "Using PIPE for %s without wait=False would deadlock"
 
     def __init__(self, client, args, check_status=True, hostname=None,
-                 label=None, timeout=None, wait=True, logger=None, cwd=None):
+                 label=None, timeout=None, deadline=None, wait=True, logger=None, cwd=None):
         """
         Create the object. Does not initiate command execution.
 
@@ -50,8 +50,8 @@ class RemoteProcess(object):
         :param hostname:     Name of remote host (optional)
         :param label:        Can be used to label or describe what the
                              command is doing.
-        :param timeout:      timeout value for arg that is passed to
-                             exec_command of paramiko
+        :param timeout:      timeout for Paramiko channel read/send (via exec_command)
+        :param deadline:     wrap command with timeout(1) and the specified duration
         :param wait:         Whether self.wait() will be called automatically
         :param logger:       Alternative logger to use (optional)
         :param cwd:          Directory in which the command will be executed
@@ -59,19 +59,19 @@ class RemoteProcess(object):
         """
         self.client = client
         self.args = args
-        if isinstance(args, basestring):
-            self.command = args
-        else:
-            self.command = quote(args)
+        self.command = quote(args)
 
+        self.deadline = deadline
+        if deadline:
+            self.command = 'timeout {duration} {cmd}'.format(duration=str(deadline), cmd=self.command)
+
+        self.cwd = cwd
         if cwd:
-            self.command = '(cd {cwd} && exec {cmd})'.format(
-                           cwd=cwd, cmd=self.command)
+            self.command = '(cd {cwd} && exec {cmd})'.format(cwd=cwd, cmd=self.command)
 
         self.check_status = check_status
         self.label = label
-        if timeout:
-            self.timeout = timeout
+        self.timeout = timeout
         if hostname:
             self.hostname = hostname
         else:
@@ -94,12 +94,8 @@ class RemoteProcess(object):
         for line in self.command.split('\n'):
             log.getChild(self.hostname).info('> %s' % line)
 
-        if hasattr(self, 'timeout'):
-            (self._stdin_buf, self._stdout_buf, self._stderr_buf) = \
-                self.client.exec_command(self.command, timeout=self.timeout)
-        else:
-            (self._stdin_buf, self._stdout_buf, self._stderr_buf) = \
-                self.client.exec_command(self.command)
+        (self._stdin_buf, self._stdout_buf, self._stderr_buf) = \
+            self.client.exec_command(self.command, timeout=self.timeout)
         (self.stdin, self.stdout, self.stderr) = \
             (self._stdin_buf, self._stdout_buf, self._stderr_buf)
 
@@ -371,6 +367,7 @@ def run(
     name=None,
     label=None,
     timeout=None,
+    deadline=None,
     cwd=None,
 ):
     """
@@ -401,8 +398,8 @@ def run(
     :param name: Human readable name (probably hostname) of the destination
                  host
     :param label: Can be used to label or describe what the command is doing.
-    :param timeout: timeout value for args to complete on remote channel of
-                    paramiko
+    :param timeout: timeout for Paramiko channel read/send (via exec_command)
+    :param deadline: timeout (passed to timeout(1)) for command to complete
     :param cwd: Directory in which the command should be executed.
     """
     try:
@@ -419,8 +416,10 @@ def run(
 
     if timeout:
         log.info("Running command with timeout %d", timeout)
+    if deadline:
+        log.info("Running command with deadline %s", deadline)
     r = RemoteProcess(client, args, check_status=check_status, hostname=name,
-                      label=label, timeout=timeout, wait=wait, logger=logger,
+                      label=label, timeout=timeout, deadline=deadline, wait=wait, logger=logger,
                       cwd=cwd)
     r.execute()
     r.setup_stdin(stdin)
