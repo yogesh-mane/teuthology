@@ -113,6 +113,10 @@ class CephAnsible(Task):
         # everything from vars in config go into group_vars/all file
         extra_vars = dict()
         extra_vars.update(self.config.get('vars', dict()))
+        if extra_vars.get('rgw_multisite_endpoint_addr'):
+            for (remote, _) in self.ctx.cluster.only(misc.is_type('rgw', self.cluster_name)).remotes.keys():
+                endpoint = 'http://' + remote.shortname + ':8080'
+            extra_vars.update(endpoint)
         gvar = yaml.dump(extra_vars, default_flow_style=False)
         self.extra_vars_file = self._write_hosts_file(prefix='teuth_ansible_gvar',
                                                       content=gvar)
