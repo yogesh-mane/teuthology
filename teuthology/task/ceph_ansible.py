@@ -115,7 +115,7 @@ class CephAnsible(Task):
         extra_vars.update(self.config.get('vars', dict()))
         if extra_vars.get('rgw_multisite_endpoint_addr'):
             rgw_role = extra_vars.get('rgw_multisite_endpoint_addr')
-            for (remote,) in self.cluster.only(rgw_role).remotes.iteritems():
+            for (remote,) in self.cluster.only(rgw_role).remotes.iterkeys():
                 endpoint = 'http://' + remote.shortname + ':8080'
             extra_vars['rgw_multisite_endpoint_addr'] = endpoint
         gvar = yaml.dump(extra_vars, default_flow_style=False)
