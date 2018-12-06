@@ -524,6 +524,7 @@ class CephAnsible(Task):
                 run.Raw(';'),
                 run.Raw(str_args)
             ],
+            timeout=4200,
         )
         if self.cluster_name == 'ceph':
             self.ready_cluster = self.ctx.cluster
