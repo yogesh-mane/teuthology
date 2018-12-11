@@ -81,7 +81,6 @@ class CephAnsible(Task):
             config['vars'] = vars
         vars = config['vars']
         self.cluster_name = vars.get('cluster', 'ceph')
-        self.inventory_yaml = None
         # for downstream bulids skip var setup
         if 'rhbuild' in config:
             return
@@ -91,10 +90,7 @@ class CephAnsible(Task):
             vars['ceph_dev_key'] = 'https://download.ceph.com/keys/autobuild.asc'
         if 'ceph_dev_branch' not in vars:
             vars['ceph_dev_branch'] = ctx.config.get('branch', 'master')
-        if self.cluster_name == 'ceph':
-            self.inventory_yaml = 'ceph-ansible/inven.yml'
-        else:
-            self.inventory_yaml = 'ceph-ansible/{}.yml'.format(self.cluster_name)
+
 
     def setup(self):
         super(CephAnsible, self).setup()
@@ -133,6 +129,8 @@ class CephAnsible(Task):
         :param _logfile: Use this file-like object instead of a LoggerFile for
                          testing
         """
+        
+        self.inventory_yaml = 'ceph-ansible/{}.yml'.format(self.cluster_name)
 
         args = [
             'ANSIBLE_STDOUT_CALLBACK=debug',
@@ -200,7 +198,6 @@ class CephAnsible(Task):
                         hosts_dict[group] = {hostname: host_vars}
                     elif hostname not in hosts_dict[group]:
                         hosts_dict[group][hostname] = host_vars
-
 
         hosts_stringio = StringIO()
         for group in sorted(hosts_dict.keys()):
