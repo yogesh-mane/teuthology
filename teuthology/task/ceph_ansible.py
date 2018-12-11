@@ -69,6 +69,7 @@ class CephAnsible(Task):
         self.playbook = None
         self.cluster_groups_to_roles = None
         self.ready_cluster = None
+        self.inventory_yaml = None
         if 'playbook' in config:
             self.playbook = self.config['playbook']
         if 'repo' not in config:
@@ -133,7 +134,7 @@ class CephAnsible(Task):
         args = [
             'ANSIBLE_STDOUT_CALLBACK=debug',
             'ansible-playbook', '-vv',
-            '-i', 'inven.yml', 'site.yml'
+            '-i', self.inventory_yaml, 'site.yml'
         ]
         log.debug("Running %s", args)
         # If there is an installer.0 node, use that for the installer.
@@ -141,7 +142,7 @@ class CephAnsible(Task):
         ansible_loc = self.ctx.cluster.only('installer.0')
         (ceph_first_mon,) = self.ctx.cluster.only(
             misc.get_first_mon(self.ctx,
-                               self.config, self.cluster_name)).remotes.iterkeys()
+                               self.config)).remotes.iterkeys()
         if ansible_loc.remotes:
             (ceph_installer,) = ansible_loc.remotes.iterkeys()
         else:
@@ -339,7 +340,7 @@ class CephAnsible(Task):
             'ANSIBLE_STDOUT_CALLBACK=debug',
             'ansible-playbook', '-vv',
             '-e', 'ireallymeanit=yes',
-            '-i', 'inven.yml', 'purge-cluster.yml'
+            '-i', self.inventory_yaml, 'purge-cluster.yml'
         ]
         log.debug("Running %s", args)
         str_args = ' '.join(args)
@@ -445,17 +446,17 @@ class CephAnsible(Task):
                                     action='check health') as proceed:
             remote = self.ceph_first_mon
             remote.run(args=[
-                'sudo', 'ceph', '--cluster', self.cluster_name, 'osd', 'tree'
+                'sudo', 'ceph', 'osd', 'tree'
             ])
             remote.run(args=[
-                'sudo', 'ceph', '--cluster', self.cluster_name, '-s'
+                'sudo', 'ceph', '-s'
             ])
             log.info("Waiting for Ceph health to reach HEALTH_OK \
                         or HEALTH WARN")
             while proceed():
                 out = StringIO()
                 remote.run(
-                    args=['sudo', 'ceph', '--cluster', self.cluster_name,
+                    args=['sudo', 'ceph',
                           'health'],
                     stdout=out,
                 )
@@ -594,7 +595,7 @@ class CephAnsible(Task):
             'ANSIBLE_STDOUT_CALLBACK=debug',
             'ansible-playbook', '-vv', 'haproxy.yml',
             '-e', "'%s'" % json.dumps(ip_vars),
-            '-i', '~/ceph-ansible/inven.yml'
+            '-i', self.inventory_yaml
         ]
         log.debug("Running %s", args)
         str_args = ' '.join(args)
@@ -610,7 +611,7 @@ class CephAnsible(Task):
             'ANSIBLE_STDOUT_CALLBACK=debug',
             'ansible-playbook', '-vv', 'keepalived.yml',
             '-e', "'%s'" % json.dumps(ip_vars),
-            '-i', '~/ceph-ansible/inven.yml'
+            '-i', self.inventory_yaml
         ]
         log.debug("Running %s", args)
         str_args = ' '.join(args)
@@ -728,7 +729,11 @@ class CephAnsible(Task):
     def _copy_and_print_config(self):
             ceph_installer = self.ceph_installer
             # copy the inventory file to installer node
-            ceph_installer.put_file(self.inventory, 'ceph-ansible/inven.yml')
+            if self.cluster_name != 'ceph':
+                self.inventory_yaml = ceph_installer.put_file(self.inventory,
+                                                    'ceph-ansible/{}.yml'.format(self.cluster_name))
+            else:
+                self.inventory_yaml = ceph_installer.put_file(self.inventory, 'ceph-ansible/inven.yml')
             # copy the config provided site file or use sample
             if self.playbook_file is not None:
                 ceph_installer.put_file(self.playbook_file, 'ceph-ansible/site.yml')
@@ -748,7 +753,10 @@ class CephAnsible(Task):
             # copy extra vars to groups/all
             ceph_installer.put_file(self.extra_vars_file, 'ceph-ansible/group_vars/all')
             # print for debug info
-            ceph_installer.run(args=('cat', 'ceph-ansible/inven.yml'))
+            if self.cluster_name != 'ceph':
+                ceph_installer.run(args=('cat', 'ceph-ansible/{}.yml'.format(self.cluster_name)))
+            else:
+                ceph_installer.run(args=('cat', 'ceph-ansible/inven.yml'))
             ceph_installer.run(args=('cat', 'ceph-ansible/site.yml'))
             ceph_installer.run(args=('cat', 'ceph-ansible/group_vars/all'))
 
@@ -813,13 +821,12 @@ class CephAnsible(Task):
         ctx.cluster.remotes.update(new_remote_role)
         (ceph_first_mon,) = self.ctx.cluster.only(
             misc.get_first_mon(self.ctx,
-                               self.config, self.cluster_name)).remotes.iterkeys()
+                               self.config)).remotes.iterkeys()
         from tasks.ceph_manager import CephManager
-        ctx.managers[self.cluster_name] = CephManager(
+        ctx.managers['ceph'] = CephManager(
             ceph_first_mon,
             ctx=ctx,
-            logger=log.getChild('ceph_manager.' + self.cluster_name),
-            cluster=self.cluster_name,
+            logger=log.getChild('ceph_manager.' + 'ceph'),
             )
 
     def _generate_client_config(self):
@@ -840,12 +847,12 @@ class CephAnsible(Task):
         log.info('Creating RBD pool')
         mon_node.run(
             args=[
-                'sudo', 'ceph', '--cluster', self.cluster_name,
+                'sudo', 'ceph',
                 'osd', 'pool', 'create', 'rbd', '128', '128'],
             check_status=False)
         mon_node.run(
             args=[
-                'sudo', 'ceph', '--cluster', self.cluster_name,
+                'sudo', 'ceph',
                 'osd', 'pool', 'application', 'enable',
                 'rbd', 'rbd', '--yes-i-really-mean-it'
                 ],
@@ -858,7 +865,7 @@ class CephAnsible(Task):
                 'sudo',
                 'chmod',
                 run.Raw('o+r'),
-                '/etc/ceph/%s.client.admin.keyring' % self.cluster_name
+                '/etc/ceph/ceph.client.admin.keyring'
             ])
 
 
