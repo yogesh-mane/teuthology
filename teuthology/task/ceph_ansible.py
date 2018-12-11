@@ -69,13 +69,16 @@ class CephAnsible(Task):
         self.playbook = None
         self.cluster_groups_to_roles = None
         self.ready_cluster = None
-        self.inventory_yaml = None
         if 'playbook' in config:
             self.playbook = self.config['playbook']
         if 'repo' not in config:
             self.config['repo'] = os.path.join(teuth_config.ceph_git_base_url,
                                                'ceph-ansible.git')
 
+        if self.cluster_name == 'ceph':
+            self.inventory_yaml = 'ceph-ansible/inven.yml'
+        else:
+            self.inventory_yaml = 'ceph-ansible/{}.yml'.format(self.cluster_name)
 
         # default vars to dev builds
         if 'vars' not in config:
@@ -730,10 +733,10 @@ class CephAnsible(Task):
             ceph_installer = self.ceph_installer
             # copy the inventory file to installer node
             if self.cluster_name != 'ceph':
-                self.inventory_yaml = ceph_installer.put_file(self.inventory,
+                ceph_installer.put_file(self.inventory,
                                                     'ceph-ansible/{}.yml'.format(self.cluster_name))
             else:
-                self.inventory_yaml = ceph_installer.put_file(self.inventory, 'ceph-ansible/inven.yml')
+                ceph_installer.put_file(self.inventory, 'ceph-ansible/inven.yml')
             # copy the config provided site file or use sample
             if self.playbook_file is not None:
                 ceph_installer.put_file(self.playbook_file, 'ceph-ansible/site.yml')
