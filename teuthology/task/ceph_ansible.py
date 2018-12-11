@@ -134,7 +134,7 @@ class CephAnsible(Task):
         args = [
             'ANSIBLE_STDOUT_CALLBACK=debug',
             'ansible-playbook', '-vv',
-            '-i', self.inventory_yaml, 'site.yml'
+            '-i', "'%s'" % json.dumps(self.inventory_yaml), 'site.yml'
         ]
         log.debug("Running %s", args)
         # If there is an installer.0 node, use that for the installer.
@@ -340,7 +340,7 @@ class CephAnsible(Task):
             'ANSIBLE_STDOUT_CALLBACK=debug',
             'ansible-playbook', '-vv',
             '-e', 'ireallymeanit=yes',
-            '-i', self.inventory_yaml, 'purge-cluster.yml'
+            '-i', "'%s'" % json.dumps(self.inventory_yaml), 'purge-cluster.yml'
         ]
         log.debug("Running %s", args)
         str_args = ' '.join(args)
@@ -595,7 +595,7 @@ class CephAnsible(Task):
             'ANSIBLE_STDOUT_CALLBACK=debug',
             'ansible-playbook', '-vv', 'haproxy.yml',
             '-e', "'%s'" % json.dumps(ip_vars),
-            '-i', self.inventory_yaml
+            '-i', "'%s'" % json.dumps(self.inventory_yaml)
         ]
         log.debug("Running %s", args)
         str_args = ' '.join(args)
@@ -611,7 +611,7 @@ class CephAnsible(Task):
             'ANSIBLE_STDOUT_CALLBACK=debug',
             'ansible-playbook', '-vv', 'keepalived.yml',
             '-e', "'%s'" % json.dumps(ip_vars),
-            '-i', self.inventory_yaml
+            '-i', "'%s'" % json.dumps(self.inventory_yaml)
         ]
         log.debug("Running %s", args)
         str_args = ' '.join(args)
