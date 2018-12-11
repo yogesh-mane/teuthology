@@ -81,6 +81,7 @@ class CephAnsible(Task):
             config['vars'] = vars
         vars = config['vars']
         self.cluster_name = vars.get('cluster', 'ceph')
+        self.inventory_yaml = None
         # for downstream bulids skip var setup
         if 'rhbuild' in config:
             return
