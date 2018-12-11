@@ -145,7 +145,7 @@ class CephAnsible(Task):
         ansible_loc = self.ctx.cluster.only('installer.0')
         (ceph_first_mon,) = self.ctx.cluster.only(
             misc.get_first_mon(self.ctx,
-                               self.config)).remotes.iterkeys()
+                               self.config, self.cluster_name)).remotes.iterkeys()
         if ansible_loc.remotes:
             (ceph_installer,) = ansible_loc.remotes.iterkeys()
         else:
@@ -427,16 +427,11 @@ class CephAnsible(Task):
             def wanted(role):
                 # Only attempt to collect logs from hosts which are part of the
                 # cluster
-                if self.cluster_name is 'ceph':
-                    return any(map(
-                        lambda role_stub: role.startswith(role_stub),
-                        self.groups_to_roles.values(),
-                    ))
-                else:
-                    return any(map(
-                        lambda role_stub: role.startswith(role_stub),
-                        self.cluster_groups_to_roles.values(),
-                    ))
+
+                return any(map(
+                    lambda role_stub: role.startswith(role_stub),
+                    self.groups_to_roles.values(),
+                ))
 
             for remote in ctx.cluster.only(wanted).remotes.keys():
                 sub = os.path.join(path, remote.shortname)
@@ -824,12 +819,13 @@ class CephAnsible(Task):
         ctx.cluster.remotes.update(new_remote_role)
         (ceph_first_mon,) = self.ctx.cluster.only(
             misc.get_first_mon(self.ctx,
-                               self.config)).remotes.iterkeys()
+                               self.config, self.cluster_name)).remotes.iterkeys()
         from tasks.ceph_manager import CephManager
-        ctx.managers['ceph'] = CephManager(
+        ctx.managers[self.cluster_name] = CephManager(
             ceph_first_mon,
             ctx=ctx,
-            logger=log.getChild('ceph_manager.' + 'ceph'),
+            logger=log.getChild('ceph_manager.' + self.cluster_name),
+            cluster=self.cluster_name,
             )
 
     def _generate_client_config(self):
