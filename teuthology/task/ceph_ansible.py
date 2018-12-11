@@ -75,11 +75,6 @@ class CephAnsible(Task):
             self.config['repo'] = os.path.join(teuth_config.ceph_git_base_url,
                                                'ceph-ansible.git')
 
-        if self.cluster_name == 'ceph':
-            self.inventory_yaml = 'ceph-ansible/inven.yml'
-        else:
-            self.inventory_yaml = 'ceph-ansible/{}.yml'.format(self.cluster_name)
-
         # default vars to dev builds
         if 'vars' not in config:
             vars = dict()
@@ -95,6 +90,10 @@ class CephAnsible(Task):
             vars['ceph_dev_key'] = 'https://download.ceph.com/keys/autobuild.asc'
         if 'ceph_dev_branch' not in vars:
             vars['ceph_dev_branch'] = ctx.config.get('branch', 'master')
+        if self.cluster_name == 'ceph':
+            self.inventory_yaml = 'ceph-ansible/inven.yml'
+        else:
+            self.inventory_yaml = 'ceph-ansible/{}.yml'.format(self.cluster_name)
 
     def setup(self):
         super(CephAnsible, self).setup()
