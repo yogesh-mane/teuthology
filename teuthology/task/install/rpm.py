@@ -184,7 +184,13 @@ def _update_package_list_and_install(ctx, remote, rpm, config):
     if dist_release in ['opensuse', 'sle']:
         remote.run(args='sudo zypper clean -a')
     else:
-        remote.run(args='sudo yum clean all')
+        remote.run(
+            args=[
+                'sudo', 'yum', 'clean', 'all',
+                'sudo', 'rm', '-rf', '/var/cache/yum',
+                'sudo', 'yum', 'makecache'
+            ]
+        )
 
     ldir = _get_local_dir(config, remote)
 
