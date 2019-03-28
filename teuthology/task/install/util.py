@@ -67,8 +67,9 @@ def ship_utilities(ctx, config):
     filenames = []
 
     log.info('Shipping valgrind.supp...')
+    assert 'suite_path' in ctx.config
     with file(
-        os.path.join(os.path.dirname(__file__), 'valgrind.supp'),
+        os.path.join(ctx.config['suite_path'], 'valgrind.supp'),
         'rb'
             ) as f:
         fn = os.path.join(testdir, 'valgrind.supp')
