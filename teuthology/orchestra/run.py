@@ -377,6 +377,7 @@ def run(
     label=None,
     timeout=None,
     cwd=None,
+    omit_sudo=False
 ):
     """
     Run a command remotely.  If any of 'args' contains shell metacharacters
