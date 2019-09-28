@@ -1240,16 +1240,20 @@ def stop_daemons_of_type(ctx, type_, cluster='ceph'):
     """
     :param type_: type of daemons to be stopped.
     """
-    log.info('Shutting down %s daemons...' % type_)
     exc_info = (None, None, None)
-    for daemon in ctx.daemons.iter_daemons_of_role(type_, cluster):
+    daemons = ctx.daemons.iter_daemons_of_role(type_, cluster)
+    log.info('Shutting down %s daemons... (%s)' % (type_, daemons))
+    for daemon in daemons:
+        log.info('Daemon %s' % daemon)
         try:
+            log.info('Stopping %s.%s...' % (daemon.role, daemon.id_))
             daemon.stop()
         except (CommandFailedError,
                 CommandCrashedError,
                 ConnectionLostError):
             exc_info = sys.exc_info()
             log.exception('Saw exception from %s.%s', daemon.role, daemon.id_)
+    log.info('Done shutting down %s daemons (%s)' % (type_, daemons))
     if exc_info != (None, None, None):
         raise exc_info[0], exc_info[1], exc_info[2]
 
