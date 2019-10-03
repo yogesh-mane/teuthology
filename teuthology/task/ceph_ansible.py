@@ -62,10 +62,10 @@ class CephAnsible(Task):
         rgws='rgw',
         clients='client',
         nfss='nfs',
+        haproxys='haproxy',
     )
 
     def __init__(self, ctx, config):
-
         super(CephAnsible, self).__init__(ctx, config)
         config = self.config or dict()
         self.playbook = None
@@ -78,19 +78,32 @@ class CephAnsible(Task):
             self.config['repo'] = os.path.join(teuth_config.ceph_git_base_url,
                                                'ceph-ansible.git')
 
-        # default vars to dev builds
-        vars = config.get('vars', dict())
-        vars['ceph_dev'] = vars.get('ceph_dev', True)
-        vars['ceph_dev_key'] = vars.get('ceph_dev_key', 'https://download.ceph.com/keys/autobuild.asc')
-        vars['ceph_dev_branch'] = vars.get('ceph_dev_branch',
-                                           ctx.config.get('branch', 'master'))
-        self.cluster_name = vars.get('cluster', 'ceph')
+        if 'cluster' in config:
+            self.cluster_name = self.config.get('cluster')
+        else:
+            self.cluster_name = None
 
         # Legacy option set to true in case we are running a test
         # which was earlier using "ceph" task for configuration
         self.legacy = False
         if 'legacy' in config:
             self.legacy = True
+
+        # default vars to dev builds
+        if 'vars' not in config:
+            vars = dict()
+            config['vars'] = vars
+        vars = config['vars']
+
+        # for downstream bulids skip var setup
+        if 'rhbuild' in config:
+            return
+        if 'ceph_dev' not in vars:
+            vars['ceph_dev'] = True
+        if 'ceph_dev_key' not in vars:
+            vars['ceph_dev_key'] = 'https://download.ceph.com/keys/autobuild.asc'
+        if 'ceph_dev_branch' not in vars:
+            vars['ceph_dev_branch'] = ctx.config.get('branch', 'master')
 
     def setup(self):
         super(CephAnsible, self).setup()
@@ -115,7 +128,6 @@ class CephAnsible(Task):
                                                       content=gvar)
 
     def remove_cluster_prefix(self):
-
         stripped_role = {}
         if self.cluster_name:
             self.each_cluster = self.ctx.cluster.only(
@@ -148,6 +160,7 @@ class CephAnsible(Task):
         args = [
             'ANSIBLE_STDOUT_CALLBACK=debug',
             'ansible-playbook', '-vv',
+            '-e', 'check_firewall=false',
             '-i', 'inven.yml', 'site.yml'
         ]
         log.debug("Running %s", args)
@@ -162,7 +175,8 @@ class CephAnsible(Task):
         else:
             ceph_installer = ceph_first_mon
         self.ceph_first_mon = ceph_first_mon
-        self.ceph_installer = ceph_installer
+        self.installer = ceph_installer
+        self.ceph_installer = self.installer
         self.args = args
         # ship utilities files
         self._ship_utilities()
@@ -364,27 +378,27 @@ class CephAnsible(Task):
             # cleanup the ansible ppa repository we added
             # and also remove the dependency pkgs we installed
             if installer_node.os.package_type == 'deb':
-                    installer_node.run(args=[
-                        'sudo',
-                        'add-apt-repository',
-                        '--remove',
-                        run.Raw('ppa:ansible/ansible'),
-                    ])
-                    installer_node.run(args=[
-                        'sudo',
-                        'apt-get',
-                        'update',
-                    ])
-                    installer_node.run(args=[
-                        'sudo',
-                        'apt-get',
-                        'remove',
-                        '-y',
-                        'ansible',
-                        'libssl-dev',
-                        'libffi-dev',
-                        'python-dev'
-                    ])
+                installer_node.run(args=[
+                    'sudo',
+                    'add-apt-repository',
+                    '--remove',
+                    run.Raw('ppa:ansible/ansible'),
+                ])
+                installer_node.run(args=[
+                    'sudo',
+                    'apt-get',
+                    'update',
+                ])
+                installer_node.run(args=[
+                    'sudo',
+                    'apt-get',
+                    'remove',
+                    '-y',
+                    'ansible',
+                    'libssl-dev',
+                    'libffi-dev',
+                    'python-dev'
+                ])
             else:
                 # cleanup rpm packages the task installed
                 installer_node.run(args=[
@@ -403,7 +417,9 @@ class CephAnsible(Task):
         if ctx.archive is not None and \
                 not (ctx.config.get('archive-on-error') and ctx.summary['success']):
             log.info('Archiving logs...')
-            path = os.path.join(ctx.archive, self.cluster_name, 'remote')
+            path = os.path.join(ctx.archive,
+                                self.cluster_name if self.cluster_name else 'ceph',
+                                'remote')
             try:
                 os.makedirs(path)
             except OSError as e:
@@ -417,6 +433,7 @@ class CephAnsible(Task):
                     lambda role_stub: role.startswith(role_stub),
                     self.groups_to_roles.values(),
                 ))
+
             for remote in self.each_cluster.only(wanted).remotes.keys():
                 sub = os.path.join(path, remote.shortname)
                 os.makedirs(sub)
@@ -461,9 +478,18 @@ class CephAnsible(Task):
                               if role.startswith('osd')])
             host_vars['devices'] = get_scratch_devices(remote)[0:dev_needed]
 
-        host_vars['monitor_interface'] = extra_vars.get('monitor_interface', remote.interface)
-        host_vars['radosgw_interface'] = extra_vars.get('radosgw_interface', remote.interface)
-        host_vars['public_network'] = extra_vars.get('public_network', remote.cidr)
+            # check if the host has nvme device, if so use it as journal
+            # fix me when possible
+            if extra_vars.get('osd_scenario') == 'non-collocated':
+                journals = ['/dev/nvme0n1']
+                host_vars['dedicated_devices'] = journals
+                host_vars['devices'] = get_scratch_devices(remote)[0:1]
+        if 'monitor_interface' not in extra_vars:
+            host_vars['monitor_interface'] = remote.interface
+        if 'radosgw_interface' not in extra_vars:
+            host_vars['radosgw_interface'] = remote.interface
+        if 'public_network' not in extra_vars:
+            host_vars['public_network'] = remote.cidr
         return host_vars
 
     def run_rh_playbook(self):
@@ -597,22 +623,6 @@ class CephAnsible(Task):
             ]
         )
 
-        args = [
-            'ANSIBLE_STDOUT_CALLBACK=debug',
-            'ansible-playbook', '-vv', 'keepalived.yml',
-            '-e', "'%s'" % json.dumps(ip_vars),
-            '-i', '~/ceph-ansible/inven.yml'
-        ]
-        log.debug("Running %s", args)
-        str_args = ' '.join(args)
-        installer_node.run(
-            args=[
-                run.Raw('cd ~/ansible-haproxy'),
-                run.Raw(';'),
-                run.Raw(str_args)
-            ]
-        )
-
     def run_playbook(self):
         # setup ansible on first mon node
         ceph_installer = self.ceph_installer
@@ -671,7 +681,7 @@ class CephAnsible(Task):
                 'rm',
                 '-rf',
                 run.Raw('~/ceph-ansible'),
-                ],
+            ],
             check_status=False
         )
         ceph_installer.run(args=[
@@ -702,12 +712,13 @@ class CephAnsible(Task):
             'pip',
             'install',
             run.Raw('setuptools>=11.3'),
-            run.Raw('notario>=0.0.13'), # FIXME: use requirements.txt
+            run.Raw('notario>=0.0.13'),  # FIXME: use requirements.txt
             run.Raw('netaddr'),
             run.Raw(ansible_ver),
             run.Raw(';'),
             run.Raw(str_args)
         ])
+        self._ship_utilities()
         wait_for_health = self.config.get('wait-for-health', True)
         if wait_for_health:
             self.wait_for_ceph_health()
@@ -718,35 +729,35 @@ class CephAnsible(Task):
         self.fix_keyring_permission()
 
     def _copy_and_print_config(self):
-            ceph_installer = self.ceph_installer
-            # copy the inventory file to installer node
-            ceph_installer.put_file(self.inventory, 'ceph-ansible/inven.yml')
-            # copy the config provided site file or use sample
-            if self.playbook_file is not None:
-                ceph_installer.put_file(self.playbook_file, 'ceph-ansible/site.yml')
-            else:
-                # use the site.yml.sample provided by the repo as the main site.yml file
-                ceph_installer.run(
-                   args=[
-                        'cp',
-                        'ceph-ansible/site.yml.sample',
-                        'ceph-ansible/site.yml'
-                        ]
-                )
-
+        ceph_installer = self.ceph_installer
+        # copy the inventory file to installer node
+        ceph_installer.put_file(self.inventory, 'ceph-ansible/inven.yml')
+        # copy the config provided site file or use sample
+        if self.playbook_file is not None:
+            ceph_installer.put_file(self.playbook_file, 'ceph-ansible/site.yml')
+        else:
+            # use the site.yml.sample provided by the repo as the main site.yml file
             ceph_installer.run(
-                args=(
-                    'sed',
-                    '-i',
-                    '/defaults/ a\deprecation_warnings=False',
-                    'ceph-ansible/ansible.cfg'))
+                args=[
+                    'cp',
+                    'ceph-ansible/site.yml.sample',
+                    'ceph-ansible/site.yml'
+                ]
+            )
 
-            # copy extra vars to groups/all
-            ceph_installer.put_file(self.extra_vars_file, 'ceph-ansible/group_vars/all')
-            # print for debug info
-            ceph_installer.run(args=('cat', 'ceph-ansible/inven.yml'))
-            ceph_installer.run(args=('cat', 'ceph-ansible/site.yml'))
-            ceph_installer.run(args=('cat', 'ceph-ansible/group_vars/all'))
+        ceph_installer.run(
+            args=(
+                'sed',
+                '-i',
+                '/defaults/ a\deprecation_warnings=False',
+                'ceph-ansible/ansible.cfg'))
+
+        # copy extra vars to groups/all
+        ceph_installer.put_file(self.extra_vars_file, 'ceph-ansible/group_vars/all')
+        # print for debug info
+        ceph_installer.run(args=('cat', 'ceph-ansible/inven.yml'))
+        ceph_installer.run(args=('cat', 'ceph-ansible/site.yml'))
+        ceph_installer.run(args=('cat', 'ceph-ansible/group_vars/all'))
 
     def _ship_utilities(self):
         with ship_utilities(self.ctx, {'skipcleanup': True}) as ship_utils:
@@ -841,25 +852,25 @@ class CephAnsible(Task):
         log.info('Creating RBD pool')
         mon_node.run(
             args=[
-                'sudo', 'ceph', '--cluster', self.cluster_name,
+                'sudo', 'ceph',
                 'osd', 'pool', 'create', 'rbd', '128', '128'],
             check_status=False)
         mon_node.run(
             args=[
-                'sudo', 'ceph', '--cluster', self.cluster_name,
+                'sudo', 'ceph',
                 'osd', 'pool', 'application', 'enable',
                 'rbd', 'rbd', '--yes-i-really-mean-it'
-                ],
+            ],
             check_status=False)
 
     def fix_keyring_permission(self):
         clients_only = lambda role: role.startswith('client')
-        for client in self.cluster.only(clients_only).remotes.iterkeys():
+        for client in self.each_cluster.only(clients_only).remotes.iterkeys():
             client.run(args=[
                 'sudo',
                 'chmod',
                 run.Raw('o+r'),
-                '/etc/ceph/%s.client.admin.keyring' % self.cluster_name
+                '/etc/ceph/%s.client.admin.keyring'
             ])
 
     # this will be called only if "legacy" is true
@@ -944,4 +955,6 @@ class CephAnsible(Task):
 class CephAnsibleError(Exception):
     pass
 
+
 task = CephAnsible
+
