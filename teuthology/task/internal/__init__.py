@@ -94,18 +94,18 @@ def check_packages(ctx, config):
             log.info("Found packages for ceph version {ver}".format(
                 ver=package.version
             ))
-        else:
-            msg = "Packages for distro '{d}' and ceph hash '{ver}' not found"
-            msg = msg.format(
-                d=package.distro,
-                ver=package.sha1,
-            )
-            log.error(msg)
-            # set the failure message and update paddles with the status
-            ctx.summary["failure_reason"] = msg
-            set_status(ctx.summary, "dead")
-            report.try_push_job_info(ctx.config, dict(status='dead'))
-            raise VersionNotFoundError(package.base_url)
+#        else:
+#            msg = "Packages for distro '{d}' and ceph hash '{ver}' not found"
+#            msg = msg.format(
+#                d=package.distro,
+#                ver=package.sha1,
+#            )
+#            log.error(msg)
+#            # set the failure message and update paddles with the status
+#            ctx.summary["failure_reason"] = msg
+#            set_status(ctx.summary, "dead")
+#            report.try_push_job_info(ctx.config, dict(status='dead'))
+#            raise VersionNotFoundError(package.base_url)
     else:
         log.info(
             "Checking packages skipped, missing os_type '{os}' or ceph hash '{ver}'".format(
