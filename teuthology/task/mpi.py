@@ -1,12 +1,12 @@
 """
 Start mpi processes (and allow commands to be run inside process)
 """
-from StringIO import StringIO
 import logging
 import re
 
 from teuthology import misc as teuthology
 from six import string_types as basestring
+from six import StringIO
 
 log = logging.getLogger(__name__)
 
