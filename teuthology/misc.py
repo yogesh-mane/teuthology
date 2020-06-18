@@ -28,6 +28,7 @@ from teuthology.orchestra import run
 from teuthology.config import config
 from teuthology.contextutil import safe_while
 from teuthology.orchestra.opsys import DEFAULT_OS_VERSION
+from teuthology.parallel import parallel
 
 from six import (reraise, ensure_str)
 
@@ -1346,3 +1347,19 @@ def sh(command, log_limit=1024, cwd=None, env=None):
             output=output
         )
     return output
+
+
+def reimage_fog(args):
+    """
+    Reimage FOG nodes with options specified
+    """
+    machines = args['--nodes']
+    nodes = machines.rstrip(',').split(',')
+    ctx = argparse.Namespace()
+    ctx.os_type = args['--os-type']
+    ctx.os_version = args['--os-version']
+    from teuthology.provision import reimage
+    with parallel() as p:
+        for node in nodes:
+            machine_type = node[:-3]
+            p.spawn(reimage, ctx, node, machine_type)

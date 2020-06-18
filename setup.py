@@ -131,6 +131,7 @@ setup(
             'teuthology-describe-tests = scripts.describe_tests:main',
             'teuthology-gencov = scripts.gencov:main',
             'teuthology-polarion = scripts.polarion:main',
+            'teuthology-reimage-fog = scripts.reimage_fog:main'
             ],
         },
 
